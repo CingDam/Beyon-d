@@ -1,5 +1,11 @@
+import Main from "@/components/Main";
+import Navigation from "@/components/Navigation";
+
 export default function Index() {
     return (
-        <><h1>Hello World!</h1></>
+       <>
+         <Navigation></Navigation>
+         <Main></Main>
+       </>
     )
 }
