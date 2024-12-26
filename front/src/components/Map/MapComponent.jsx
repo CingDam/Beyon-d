@@ -13,7 +13,8 @@ const MapComponents = ({location,
     selInputRef}) => {
 
     const [mapInfo,setMapInfo] = useState(null);
-    const [results,setResults] = useState(null);
+    const [results,setResults] = useState([]);
+    const [selectList, setSelectList] = useState([]);
 
 
 
@@ -23,31 +24,35 @@ const MapComponents = ({location,
         
     const containerStyle = {
       width: "100%",
-      height: "100vh",
+      height: "auto",
     };
 
+    useEffect(()=>{
+      setSelectList(selLocation.map(location => location.item))}
+      ,[selLocation])
 
+    // 주변검색 => 지도가 로드된 후
     useEffect(() => {
-      // 주변검색
       if(mapInfo) {
         const service = new window.google.maps.places.PlacesService(mapInfo);
 
         const request = {
           location: new window.google.maps.LatLng(location.lat,location.lng),
           radius: 10000,
-          keyword : `(${city} 여행명소) OR (${city} 観光地)`,
+          keyword : `(${city} 여행명소)`,
           types: ['tourist_attraction','establishment'],
         }
-        service.nearbySearch(request, (results, stauts) => {
+        service.nearbySearch(request, ( result, stauts, pageToken ) => {
           if(stauts === window.google.maps.places.PlacesServiceStatus.OK) {
-            console.log(results);
-            setResults(results);
+            result = result.map(item =>( {...item, status:false}))
+            result.map(item => setResults(prev => [...prev, item]))
+            pageToken.nextPage();
           }
         });
       }
     },[mapInfo])
 
-
+    // 마커 생성시 줄
     useEffect(() => {
       if (mapInfo && selLocation.length > 1) {
         const polyline = new window.google.maps.Polyline({
@@ -73,62 +78,89 @@ const MapComponents = ({location,
       }
     }, [mapInfo, selLocation]);
 
+    const formatIndex = (value) => {
+      return String(value).padStart(2,"0");
+    }
+
     const handleMapLoad = (map) => {
       console.log("로딩완료");
       const selMap = map.map;
       if(!isLoading) {
         setIsLoading(true);
+        setResults([]);
       }
       setMapInfo(selMap);
     }
 
-    const handelSelLocation = (index, isChecked) => {
-      const selVal = JSON.parse(selInputRef.current[index].value);
-      setSelLocation(prev => {
-        if (isChecked) {
-          // 체크된 경우: 값 추가 (중복 방지)
-          // Array.some(): 조건에 부합하면 배열추가
-          const exists = prev.some(
-            (item) => item.lat === selVal.lat && item.lng === selVal.lng
-          );
-          if (!exists) {
-            return [...prev, selVal];
-          }
-          return prev; // 이미 존재하면 추가하지 않음
-        } else {
-          // 체크 해제된 경우: 값 제거
-          return prev.filter(
-            (item) => item.lat !== selVal.lat || item.lng !== selVal.lng
-          );
-        }
-      });
 
+    // 가고싶은곳 선택시 배열에 추가
+    const handelSelLocation = (index , lat, lng, item) => {
+      console.log("받은 인덱스 값:",index)
+      item["status"] = true;
+      const selVal = {num: index+1, lat:lat, lng:lng, item: item};
+      setSelLocation(prev => [...prev,selVal]);
+    }
+
+    const DelSelLocation = (index) => {
+      setSelLocation(prev => prev.filter(item => item.num !== (index+1)));
+      console.log(selLocation);
     }
 
   return (
     <div className={MapStyle.container}>
-        <div className={MapStyle.search}>
-          {results?.map((result,index) => <div key={index}>
-            <p>{index+1}.</p>
-            <div>
-              <img src={`${result.photos[0].getUrl({ maxWidth: 300, maxHeight: 300 })}`}></img>
+      <div>
+        <p className={MapStyle.subtitle}>추천 관광지</p>
+          <div className={MapStyle.search}>
+            {results?.map((result,index) => <div key={index}>
+              <div>
+              <div>
+                <p className={MapStyle.text}>{formatIndex(index+1)}</p>
+              </div>
+                <div>
+                  <img src={result.photos ? result.photos[0].getUrl({ maxWidth: 300, maxHeight: 300 }) : null}></img>
+                </div>
+                <div>
+                  <p className={MapStyle.text}>{result.name}</p>
+                  <p>{result.vicinity}</p>
+                </div>
+              </div>
+              <div>
+                <button onClick={()=> handelSelLocation(
+                  index,
+                  result.geometry.location.lat(),
+                  result.geometry.location.lng(),
+                  result
+                )}>{result.status ? "선택됨":"추가"}</button>
+              </div>
+            </div>)}
+          </div>
+      </div>
+        <div>
+          <p className={MapStyle.subtitle}>선택 목록</p>
+          <div className={MapStyle.selectBox}>
+            {selLocation && <>
+                  {
+                    selectList.map((location,index) => (
+                      <div key={index}>
+                        <div>
+                          <p className={MapStyle.text}>{formatIndex(index+1)}</p>
+                        </div>
+                        <div>
+                          <img src={location.photos ? location.photos[0].getUrl({ maxWidth: 300, maxHeight: 300 }) : null}></img>
+                        </div>
+                        <div>
+                          <p className={MapStyle.text}>{location.name}</p>
+                          <p>{location.vicinity}</p>
+                        </div>
+                        <div>
+                          <button onClick={()=> DelSelLocation(index)}>삭제</button>
+                        </div>
+                      </div>
+                    ))
+                  }
+                </>
+              }
             </div>
-            <div>
-              <p>{result.name}</p>
-              <p>{result.vicinity}</p>
-            </div>
-            <div>
-              <input type="checkbox"
-                defaultValue={JSON.stringify({
-                lat:result.geometry.location.lat(),
-                lng:result.geometry.location.lng()
-                })}
-                defaultChecked={false}
-                onChange={(e) => handelSelLocation(index,e.target.checked)}
-                ref={el => selInputRef.current[index] = el}
-              />
-            </div>
-          </div>)}
         </div>
         <APIProvider apiKey={apiKey} libraries={libs}>
             <Map
