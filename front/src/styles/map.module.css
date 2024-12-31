@@ -3,19 +3,35 @@
     margin-top: 30px;
 }
 .container > div:first-child {
-    width: 30%;
+    padding: 10px;
+    width: 40%;
 }
 
 .container > div:nth-child(2) {
     margin:0 10px ;
-    width: 30%;
+    width: 40%;
     padding: 10px;
 }
 .subtitle {
     position: sticky;
-    margin: 10px;
+    margin: 10px 0 ; margin-left: 20px;
     font-size: 24px;
     font-weight: 700;
+}
+
+.address {
+    font-size: 12px;
+}
+
+.text {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.container > div > div > button {
+    margin: 10px 0;
+    margin-left: 20px;
+    padding: 5px 10px;
 }
 
 .search {
@@ -24,6 +40,7 @@
     height: 100vh;
     overflow: auto;
     -ms-overflow-style: none;
+    user-select: none;
 }
 
 .search::-webkit-scrollbar {
@@ -36,18 +53,13 @@
     border: 1px solid rgba(0, 0, 0, 0.25); border-radius: 5px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.25);
     margin: 10px 0;
-    container-type: inline-size;
+    align-items: center;
 }
 
 .search img {
-    width: 100%;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     border-radius: 5px;
-}
-
-.search .text {
-    font-size: 18px;
-    font-weight: 700;
 }
 
 .search > div > div {
@@ -59,25 +71,20 @@
     width: 80%;
 }
 .search > div > div > div{
-    margin: 0 10px;
+    margin-left: 15px;
 }
-.search > div > div > div:nth-child(2) {
-    width: 100px;
+.search > div > div > div:nth-child(3) {
+    width: 100%;
 }
 
 .search button {
+    text-align: center;
     position: relative;
-    padding: 5px 10px;
-    left: 50%; top: 30px;
+    border-radius: 5px;
+    padding: 5px 12px;
+    left: 2%; top: 20px;
 }
 
-@container (max-width: 300px) {
-    .search button {
-        position: relative;
-        padding: 5px 10px;
-        left:0 ; top: 30px;
-    }
-}
 
 .selectBox {
     overflow: scroll;
@@ -85,6 +92,7 @@
     height: 100vh;
     margin-left: 10px;
     -ms-overflow-style: none;
+    user-select: none;
 }
 
 .selectBox::-webkit-scrollbar {
@@ -97,18 +105,14 @@
     border: 1px solid rgba(0, 0, 0, 0.25); border-radius: 5px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.25);
     margin: 10px 0;
-    container-type: inline-size;
+    align-items: center;
+    user-select: none;
 }
 
 .selectBox img {
     width: 50px;
     height: 50px;
     border-radius: 5px;
-}
-
-.selectBox > div {
-    display: flex;
-    align-items: center;
 }
 
 .selectBox > div > div{
@@ -118,14 +122,12 @@
     width: 50px;
 }
 .selectBox > div > div:nth-child(3) {
-    width: 80%;
+    width: 70%;
 }
-.selectBox .text {
-    font-size: 18px;
-    font-weight: 700;
-} 
+
 .selectBox button {
+    text-align: center;
     position: relative;
-    padding: 10px;
-    left: 20%;
+    border-radius: 5px;
+    padding: 5px 12px;
 }
