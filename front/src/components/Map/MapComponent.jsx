@@ -21,6 +21,9 @@ const MapComponents = ({location,
     const [searchKeyword, setSerachKeyword] = useState("인기있는 장소들")
 
 
+    const searchRef = useRef();
+    let isCancelled = false;
+
 
     const libs = ["places","marker"];
     const mapId = "ed3bd3a47cfd4697";
@@ -32,7 +35,7 @@ const MapComponents = ({location,
     };
 
     useEffect(()=>{
-      console.log("배열 변경")
+      console.log("배열 변경:", selLocation)
       setSelectList(selLocation.map(location => ({num: location.num,item: location.item })))}
       ,[selLocation])
 
@@ -40,7 +43,6 @@ const MapComponents = ({location,
     useEffect(() => {
       if(mapInfo) {
         console.log(searchKeyword)
-        let isCancelled = false;
         const service = new window.google.maps.places.PlacesService(mapInfo);
 
         // 사각 구역 값 받아오기
@@ -141,12 +143,13 @@ const MapComponents = ({location,
       console.log("로딩완료");
       const selMap = map.map;
       if(!isLoading) {
+        setResults([]);
+        setSelLocation([]);
         setIsLoading(true);
         setDragOn(false);
         setSerachKeyword("인기있는 장소들");
       }
       setResetSearch(true); 
-
       setMapInfo(selMap);
     }
 
@@ -164,6 +167,7 @@ const MapComponents = ({location,
 
     // 가고싶은 곳 선택시 배열에 추가
     const handelSelLocation = (index , lat, lng, item) => {
+      console.log(item)
 
       // 선택 status가 false면 추가 아니면 제거
       if(item.selStatus === false) {
@@ -171,28 +175,40 @@ const MapComponents = ({location,
         const selVal = {num: index+1, lat:lat, lng:lng, item: item};
         setSelLocation(prev => [...prev,selVal]);
       } else {
-        setSelLocation(prev => prev.filter(item => item.num !== (index+1)));
-        results[index].selStatus = false;
+        setSelLocation(prev => 
+          prev.filter(duplicateItem => 
+            {
+              results.filter(result => {
+                if (result.name === item.name) {
+                  console.log(result.name)
+                  if (result.selStatus) {
+                   return result.selStatus = false;
+                  }
+                } 
+              });
+              return duplicateItem?.item.name !== item.name
+            }));
       }
 
     }
 
     // 삭제 버튼 누르면 선택 목록 제거
-    const DelSelLocation = (num) => {
-      console.log(num)
-      setSelLocation(
-        prev => 
-          prev.filter(
-            item => {
-              if( (item.num === num) && (results[num-1].name !== item.name)) {
-                results[num-1].selStatus = false;
-                return true;
-              }
-            }));
+    const DelSelLocation = (index) => {
+      results.filter(result => {
+        if (result.name === selLocation[index].item.name) {
+          console.log(result)
+          if (result.selStatus) {
+            result.selStatus = false;
+          }
+        } 
+      });
 
-      console.log
+
+      setSelLocation(selLocation.filter(item => item.item.name !== selLocation[index].item.name));
+      console.log(selLocation)
+
     }
-
+    // 드래그 기능
     // 드래그 시작 (인덱스 번호 저장) 
     const dragStart = (index) => {
       setDragIndex(index);
@@ -215,10 +231,87 @@ const MapComponents = ({location,
       }
     }
 
+
+    // 검색
+    const findPlace = () => {
+      setResults([]);
+      isCancelled = true;
+      const searchKeyword = searchRef.current.value;
+      const service = new google.maps.places.PlacesService(mapInfo);
+      const {Gh,ei} = mapInfo.getBounds();
+
+      const bounds = new google.maps.LatLngBounds(
+        new google.maps.LatLng(Gh.lo,Gh.hi),
+        new google.maps.LatLng(ei.lo,ei.lo)
+      )
+      
+      const request = {
+        bounds: bounds,
+        query:`${city}의 ${searchKeyword}`,
+        rankby: 'prominence',
+      }
+
+      const selLocationNames = selectList.map(item => item.item.name)
+
+      service.textSearch(request,(result,status,pageToken)=>{
+        console.log(status)
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+          isCancelled = false;
+          console.log("검색 결과:",result);
+          const filteredResults = result
+            .filter(
+              item =>
+                item.photos &&
+                item.business_status &&
+                item.business_status !== 'CLOSED_TEMPORARILY'
+            )
+            .map(item => ({
+              ...item,
+              selStatus: selLocationNames.includes(item.name),
+            }));
+  
+          // 상태 업데이트를 한 번에 처리
+          setResults(prev => {
+            const newResults = filteredResults.filter(
+              newItem => !prev.some(prevItem => prevItem.name === newItem.name)
+            );
+            return [...prev, ...newResults];
+          });
+  
+          // 다음 페이지 처리
+          if (pageToken && pageToken.nextPage) {
+            setTimeout(() => {
+              if (!isCancelled) {
+                pageToken.nextPage();
+              }
+            }, 2000);
+          }
+        }
+        searchRef.current.value = '';
+      }) 
+    }
+
   return (
     <div className={MapStyle.container}>
       <div>
         <p className={MapStyle.subtitle}>추천 여행지</p>
+        <div>
+          <input 
+            type="text" 
+            placeholder="가고싶은곳을 적어보세요"
+            onKeyDown={e => {
+              if(e.key === "Enter") {
+                if(searchRef.current.value == '') {
+                  alert("검색어를 입력해주세요!")
+                  searchRef.current.focus()
+                } else {
+                  findPlace()
+                }
+              }
+            }}
+            ref={searchRef}/>
+          <button onClick={findPlace}>검색하기</button>
+        </div>
         <div>
           <button onClick={() => changeKeyword("인기있는 장소들")}>추천 장소</button>
           <button onClick={() => changeKeyword("관광 명소")}>명소</button>
@@ -273,7 +366,7 @@ const MapComponents = ({location,
                           <p>{location.item.formatted_address.substring(0,16)}...</p>
                           <p>{location.item.types[0]}</p>
                         </div>
-                        <button onClick={()=> DelSelLocation(location.num)}>삭제</button>
+                        <button onClick={()=> DelSelLocation(index)}>삭제</button>
                       </div>
                     ))
                   }
