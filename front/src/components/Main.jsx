@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react"
 import MapComponents from "./Map/MapComponent";
+import { MapContext } from "@/context/MapContext";
 
 
 export default function Main() {
@@ -34,16 +35,11 @@ export default function Main() {
                 <button data-lat="40.7128" data-lng="-74.0060" onClick={onChangeLocation}>뉴욕</button> 
                 <button data-lat="35.151001" data-lng="126.925393" onClick={onChangeLocation}>동명동</button> 
             </div>
-            {location && <MapComponents 
-                city = {city}
-                location = {location} 
-                isLoading = {isLoading}
-                setIsLoading = {setIsLoading}
-                mapKey = {mapKey}
-                selLocation = {selLocation}
-                setSelLocation = {setSelLocation}
-                selInputRef={selInputRef}
-                />}
+            <MapContext.Provider value={{city, mapKey, isLoading, setIsLoading, selLocation, setSelLocation, selInputRef}}>
+                {
+                    location && <MapComponents/> 
+                }
+            </MapContext.Provider>
         </>
     )
 }
