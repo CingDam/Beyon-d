@@ -1,21 +1,24 @@
 import { MapContext } from '@/context/MapContext';
-import { Search } from '@mui/icons-material';
+import { DeleteOutline, Search } from '@mui/icons-material';
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import MapStyle from "@/styles/map.module.css"
+import { useRouter } from 'next/navigation';
 
 const ScheduleList = ({mapInfo,
     select,
+    setSelect,
     searchKeyword,
+    setSerachKeyword,
     results,
     setResults,
     resetSearch,
     setResetSearch,
     dragOn,setDragOn}) => {
-
+    
+    const router = useRouter();
     const [selectList, setSelectList] = useState([]);
     const [dragIndex,setDragIndex] = useState(null);
-
-    const {city, selLocation, setSelLocation} = useContext(MapContext)
+    const {selLocation, setSelLocation} = useContext(MapContext);
 
     const searchRef = useRef();
     let isCancelled = false;

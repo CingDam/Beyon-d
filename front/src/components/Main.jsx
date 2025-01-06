@@ -1,29 +1,29 @@
 "use client"
 
-import { useRef, useState } from "react"
-import MapComponents from "./Map/MapComponent";
-import { MapContext } from "@/context/MapContext";
-
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation";
 
 export default function Main() {
 
+    const router = useRouter();
+
     const [location,setLocation] = useState(null);
-    const [isLoading,setIsLoading] = useState(false);
-    const [mapKey,setMapKey] =  useState(0);
-    const [selLocation,setSelLocation] = useState([]);
     const [city, setCity] = useState(null);
-    const selInputRef = useRef([]);
+
+    useEffect(()=> {
+        if(location) {
+            console.log(location)
+            router.push("/schedule");
+        }
+    },[location])
 
     const onChangeLocation = (e) => {
         const lat = Number(e.target.dataset.lat);
         const lng = Number(e.target.dataset.lng);
         setLocation({lat: lat, lng: lng});
         setCity(e.target.innerText);
-        setIsLoading(false);
-        // 좌표 이동시 지도 재실행 => 키값을 바꿔서 다시 실행
-        setMapKey(prevNum => prevNum+1);
-        setSelLocation([]);
-        selInputRef.current.map(item => item.checked = false);
+
+        router.push('/schedule')
     }
 
     return (
@@ -35,11 +35,7 @@ export default function Main() {
                 <button data-lat="40.7128" data-lng="-74.0060" onClick={onChangeLocation}>뉴욕</button> 
                 <button data-lat="35.151001" data-lng="126.925393" onClick={onChangeLocation}>동명동</button> 
             </div>
-            <MapContext.Provider value={{city, mapKey, isLoading, setIsLoading, selLocation, setSelLocation, selInputRef}}>
-                {
-                    location && <MapComponents/> 
-                }
-            </MapContext.Provider>
+
         </>
     )
 }
