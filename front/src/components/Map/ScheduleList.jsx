@@ -1,36 +1,31 @@
 import { MapContext } from '@/context/MapContext';
-import { Search } from '@mui/icons-material';
+import { ArrowBackIosNewRounded, ArrowForwardIosRounded, DeleteOutline, Search } from '@mui/icons-material';
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import MapStyle from "@/styles/map.module.css"
 
 const ScheduleList = ({mapInfo,
     select,
+    setSelect,
     searchKeyword,
+    setSerachKeyword,
     results,
     setResults,
     resetSearch,
     setResetSearch,
-    dragOn,setDragOn}) => {
-
+    dragOn,setDragOn,
+    city}) => {
+    
     const [selectList, setSelectList] = useState([]);
     const [dragIndex,setDragIndex] = useState(null);
-
-    const {city, selLocation, setSelLocation} = useContext(MapContext)
+    const {selLocation, setSelLocation} = useContext(MapContext);
+    const [folded,setFolded] = useState(false);
 
     const searchRef = useRef();
-    let isCancelled = false;
 
-
-    useEffect(()=>{
-      console.log("배열 변경:", selLocation)
-      setSelectList(selLocation.map(location => ({num: location.num,item: location.item })))}
-      ,[selLocation])
-
-    // 주변검색 => 지도가 로드된 후
-    useEffect(() => {
-      if(mapInfo) {
-        console.log(searchKeyword)
-        const service = new window.google.maps.places.PlacesService(mapInfo);
+    
+    const createResult = (searchKeyword) => {
+      let isCancelled = false;
+      const service = new window.google.maps.places.PlacesService(mapInfo);
 
         // 사각 구역 값 받아오기
         const {Gh,ei} = mapInfo.getBounds();
@@ -57,7 +52,8 @@ const ScheduleList = ({mapInfo,
                     item =>
                       item.photos &&
                       item.business_status &&
-                      item.business_status !== 'CLOSED_TEMPORARILY'
+                      item.business_status !== 'CLOSED_TEMPORARILY' &&
+                      !item.types.includes("travel_agency","train_station")
                   )
                   .map(item => ({
                     ...item,
@@ -86,8 +82,20 @@ const ScheduleList = ({mapInfo,
 
           return () => {
             console.log("초기화")
+            setResults([]);
             isCancelled = true;
           }
+    }
+
+    useEffect(()=>{
+      console.log(city)
+      setSelectList(selLocation.map(location => ({num: location.num,item: location.item })))}
+      ,[selLocation])
+
+    // 주변검색 => 지도가 로드된 후
+    useEffect(() => {
+      if(mapInfo) {
+        createResult(searchKeyword);
       }
     },[mapInfo,searchKeyword,resetSearch])
 
@@ -184,7 +192,7 @@ const ScheduleList = ({mapInfo,
     }
 
     // 드래그 오버
-    const dragOver = (e,index) => {
+    const dragOver = (e) => {
       e.preventDefault()
     }
 
@@ -205,60 +213,10 @@ const ScheduleList = ({mapInfo,
     const findPlace = () => {
       const searchKeyword = searchRef.current.value;
       if (searchKeyword !== '') {
+        setSelect(null);
         setResults([]);
-        isCancelled = true;
-        const service = new google.maps.places.PlacesService(mapInfo);
-        const {Gh,ei} = mapInfo.getBounds();
-
-        const bounds = new google.maps.LatLngBounds(
-          new google.maps.LatLng(Gh.lo,Gh.hi),
-          new google.maps.LatLng(ei.lo,ei.lo)
-        )
-        
-        const request = {
-          bounds: bounds,
-          query:`${city}의 ${searchKeyword}`,
-          rankby: 'prominence',
-        }
-
-        const selLocationNames = selectList.map(item => item.item.name)
-
-        service.textSearch(request,(result,status,pageToken)=>{
-          console.log(status)
-          if (status === google.maps.places.PlacesServiceStatus.OK) {
-            isCancelled = false;
-            console.log("검색 결과:",result);
-            const filteredResults = result
-              .filter(
-                item =>
-                  item.photos &&
-                  item.business_status &&
-                  item.business_status !== 'CLOSED_TEMPORARILY'
-              )
-              .map(item => ({
-                ...item,
-                selStatus: selLocationNames.includes(item.name),
-              }));
-    
-            // 상태 업데이트를 한 번에 처리
-            setResults(prev => {
-              const newResults = filteredResults.filter(
-                newItem => !prev.some(prevItem => prevItem.name === newItem.name)
-              );
-              return [...prev, ...newResults];
-            });
-    
-            // 다음 페이지 처리
-            if (pageToken && pageToken.nextPage) {
-              setTimeout(() => {
-                if (!isCancelled) {
-                  pageToken.nextPage();
-                }
-              }, 2000);
-            }
-          }
-          searchRef.current.value = '';
-        }) 
+        setSerachKeyword(searchKeyword);
+        createResult(searchKeyword);
       } else {
         alert("검색어를 입력해주세요!");
         searchRef.current.focus();
@@ -267,7 +225,7 @@ const ScheduleList = ({mapInfo,
 
   return (
     <>
-        <div>
+      <div>
         <p className={MapStyle.subtitle}>추천 여행지</p>
         <div className={MapStyle.searchBar}>
             <input 
@@ -300,34 +258,37 @@ const ScheduleList = ({mapInfo,
             className={select === "인기 디저트 점" ? MapStyle.select : ''}
             onClick={() => changeKeyword("인기 디저트 점")}>디저트</button>
         </div>
-            <div className={MapStyle.search}>
-            {results?.map((result,index) => <div key={index}>
-                <div>
-                <div>
-                    <img src={result.photos ? result.photos[0].getUrl({ maxWidth: 300, maxHeight: 300 }) : null}></img>
-                </div>
-                <div>
-                    <p className={MapStyle.text}>{result.name}</p>
-                    <p className={MapStyle.address}>{result.formatted_address.substring(0,23)}...</p>
-                    <p>{result.types[0]}</p>
-                </div>
-                </div>
-                <button className={result.selStatus ? MapStyle.select: ''} onClick={() => handelSelLocation(
-                    index,
-                    result.geometry.location.lat(),
-                    result.geometry.location.lng(),
-                    result
-                )}>{result.selStatus ? "선택됨":"추가"}</button>
-            </div>)}
-            </div>
+        <div className={MapStyle.search}>
+          {results?.map((result,index) => <div key={index}>
+              <div>
+              <div>
+                  <img src={result.photos ? result.photos[0].getUrl({ maxWidth: 300, maxHeight: 300 }) : null}></img>
+              </div>
+              <div>
+                  <p className={MapStyle.text}>{result.name}</p>
+                  <p className={MapStyle.address}>{result.formatted_address.substring(0,23)}...</p>
+                  <p>{result.types[0]}</p>
+              </div>
+              </div>
+              <button className={result.selStatus ? MapStyle.select: ''} onClick={() => handelSelLocation(
+                  index,
+                  result.geometry.location.lat(),
+                  result.geometry.location.lng(),
+                  result
+              )}>{result.selStatus ? "선택됨":"추가"}</button>
+          </div>)}
         </div>
-        <div>
+
+      </div>
+      <div className={`${MapStyle.selectContainer} ${folded ? MapStyle.folded : ''}`}>
+           <div className={MapStyle.subtitleContainer}>
             <span className={MapStyle.subtitle}>선택 목록</span>
-            <button
-            className={dragOn ? MapStyle.select:''}
-            onClick = {() => dragOn ? setDragOn(false) : setDragOn(true)}>
-            {dragOn ? "수정완료" : "수정하기"}
-            </button>
+              <button
+              className={dragOn ? MapStyle.select:''}
+              onClick = {() => dragOn ? setDragOn(false) : setDragOn(true)}>
+              {dragOn ? "수정완료" : "수정하기"}
+              </button>
+           </div>
             <div className={MapStyle.selectBox}>
             {selLocation && <>
                     {
@@ -355,8 +316,13 @@ const ScheduleList = ({mapInfo,
                     }
                 </>
                 }
-            </div>
         </div>
+      </div>
+      <div className={`${MapStyle.foldBtn} ${folded ? MapStyle.foldedBtn: ''}`}
+        onClick = {() => (folded ? setFolded(false) : setFolded(true))}
+      >
+          {folded ? <ArrowBackIosNewRounded/> : <ArrowForwardIosRounded/>}
+      </div>
     </>
   )
 }
