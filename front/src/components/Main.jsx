@@ -10,20 +10,36 @@ export default function Main() {
     const [location,setLocation] = useState(null);
     const [city, setCity] = useState(null);
 
-    useEffect(()=> {
-        if(location) {
-            console.log(location)
-            router.push("/schedule");
-        }
-    },[location])
-
     const onChangeLocation = (e) => {
         const lat = Number(e.target.dataset.lat);
         const lng = Number(e.target.dataset.lng);
         setLocation({lat: lat, lng: lng});
         setCity(e.target.innerText);
 
-        router.push('/schedule')
+        if(location) {
+            fetch("/api/to-schedule",{
+                method:"POST",
+                headers: {
+                    "Content-Type":"application/json"
+                },
+                body: JSON.stringify({
+                    location: location,
+                    city: city
+                })
+            }).then(async (res) => {
+                if(!res.ok) {
+                    console.error(err)
+                }
+
+                return res.json();
+            }).then(data => {
+                console.log(data)
+                if(data.success) {
+                    console.log("성공")
+                    router.push("/schedule")
+                }
+            }).catch(err => console.log(err))
+        }
     }
 
     return (
@@ -33,7 +49,6 @@ export default function Main() {
                 <button data-lat="35.6895" data-lng="139.6917" onClick={onChangeLocation}>도쿄</button>
                 <button data-lat="37.5665" data-lng="126.9780" onClick={onChangeLocation}>서울</button>
                 <button data-lat="40.7128" data-lng="-74.0060" onClick={onChangeLocation}>뉴욕</button> 
-                <button data-lat="35.151001" data-lng="126.925393" onClick={onChangeLocation}>동명동</button> 
             </div>
 
         </>

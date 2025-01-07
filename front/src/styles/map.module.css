@@ -1,6 +1,5 @@
 .container {
     display: flex;
-    margin-top: 30px;
 }
 .container > div:first-child {
     overflow: hidden;
@@ -10,39 +9,41 @@
     width: 50%;
     justify-content: center;
     flex-direction: column;
+
 }
 
-.container > div:nth-child(2) {
+.selectContainer {
+    position: relative;
     margin:0 10px;
     width: 40%;
     padding: 10px;
 }
 
-.container > div:nth-child(2) > button {
-    margin-left: 218px; margin-top: 2px;
+.subtitleContainer  > button {
+    margin-left: 45%; margin-top: 2px;
     border-radius: 5px;
     padding: 5px 10px;
-    width: 100px;
+    width: 25%;
     font-size: 16px;
     font-weight: 700;
     border: 1px solid rgba(0, 0, 0, 0.25);
     background-color: white;
 }
 
-.container > div:nth-child(2) > button:hover {
+.subtitleContainer  > button:hover {
     cursor: pointer;
     background-color: #81BFDA;
     border: 2px solid rgba(64, 99, 114);
     transition: 0.3s;
 }
-.container > div:nth-child(2) > button.select {
+.subtitleContainer  > button.select {
     transition: 0.2s;
     background-color: #81BFDA;
     border: 2px solid rgba(64, 99, 114);
     font-weight: 700;
 }
 
-.container > div:nth-child(2) > button.select:hover {
+.subtitleContainer > button.select:hover {
     border: 1px solid rgba(0, 0, 0, 0.25);
     background-color: white;
 }
@@ -74,7 +75,7 @@
     background-color: white;
     margin: 20px 0 10px 0;
     margin-left: 5px;
-    width : 100px;
+    width : 18.5%;
     padding: 8px 0;
     transition: 0.3s;
 }
@@ -112,7 +113,7 @@
 }
 
 .searchBar > button > svg {
-    position: absolute; top: 168px; left: 23vw;
+    position: absolute; top: 6.8%; left: 23vw;
     width: 36px; height: 36px;
 }
 
@@ -142,7 +143,6 @@
     margin: 30px 0;
     align-items: center;
 }
-
 .search img {
     width: 80px;
     height: 80px;
@@ -171,7 +171,7 @@
     text-align: center;
     position: relative;
     border-radius: 5px;
-    width: 100px;
+    width: 20%;
     padding: 5px 25px;
     left: 0%; top: 20px;
     transition: 0.2s;
@@ -193,7 +193,6 @@
     color: white;
     transition: 0.2s;
 }
-
 .selectBox {
     overflow: scroll;
     width: 100%;
@@ -246,4 +245,63 @@
     cursor: pointer;
     color: #d80400;
     transition: 0.2s;
+}
+.toback {
+    position: sticky;
+    width: 100%;
+    height: 50px; 
+    background-color: #3468C0;
+    font-weight: 700; font-size: 20px; color: white;
+    text-align: center;
+}
+.toback:hover {
+    cursor: pointer;
+}
+
+.foldBtn {
+    text-align: center;
+    position: absolute;
+    background-color: white;
+    border-top-right-radius:10px; ;border-bottom-right-radius: 10px;
+    z-index: 1;
+    width : 30px;
+    height : 90px;
+    left: calc(100vw - 52%); top: 450px;
+}
+.foldBtn > svg {
+    margin-top: 30px;
+}
+.foldBtn:hover {
+    cursor: pointer;
+}
+
+.folded {
+    animation: to-left 1s;
+    opacity:0;
+    width: 10%;
+}
+.foldedBtn {
+    animation: to-leftBtn 1s;
+    left: calc(100vw - 61.6%);
+}
+@keyframes to-left {
+    from {
+        width: 40%;
+    } to {
+        width: 10%;
+    }
+}
+@keyframes to-leftBtn {
+    from {
+        left: calc(100vw - 52%);
+    } to {
+        left: calc(100vw - 61.6%);
+    }
+}
+@keyframes fade-out {
+    from {
+        opacity:1;
+    } to {
+        opacity:0;
+    }
 }

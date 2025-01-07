@@ -1,7 +1,7 @@
 "use client"
 
 import { AdvancedMarker, AdvancedMarkerAnchorPoint, APIProvider, ControlPosition, Map, MapControl, Pin } from "@vis.gl/react-google-maps";
-import { useContext,useState } from "react";
+import { useContext,useEffect,useState } from "react";
 import MapStyle from "@/styles/map.module.css"
 import ScheduleList from "./ScheduleList";
 import { MapContext } from "@/context/MapContext";
@@ -9,8 +9,6 @@ import { useRouter } from "next/navigation";
 
 const MapComponents = () => {
     const router = useRouter();
-    const query = router.query;
-    console.log("받아온 쿼리:", query)
     const libs = ["places","marker"];
     const mapId = "ed3bd3a47cfd4697";
     const apiKey = "AIzaSyDY4kZ-eJurK-Uv1sO-IXdpizQywV38ezs";
@@ -19,6 +17,8 @@ const MapComponents = () => {
       height: "auto",
     };
 
+    const [location,setLocation] = useState(null);
+    const [city,setCity] = useState(null);
     const [mapInfo,setMapInfo] = useState(null);
     const [select, setSelect] = useState(null);
     const [searchKeyword, setSerachKeyword] = useState("인기있는 장소들");
@@ -27,6 +27,23 @@ const MapComponents = () => {
     const [dragOn,setDragOn] = useState(false);
     const [isLoading,setIsLoading] = useState(false);
     const [selLocation,setSelLocation] = useState([]);
+
+    useEffect(()=> {
+      fetch("/api/to-schedule")
+      .then(res => {
+        if(!res.ok) {
+          console.error("데이터 불러오기 실패!")
+          router.back()
+        }
+        return res.json()
+      }).then(data => {
+        console.log(data)
+        if(data) {
+          setLocation(JSON.parse(data.location.value));
+          setCity(data.city.value);
+        }
+      })
+    },[])
 
     const handleMapLoad = (map) => {
       console.log("로딩완료");
@@ -43,7 +60,6 @@ const MapComponents = () => {
       setMapInfo(selMap);
     }
 
-
   return (
     <div className={MapStyle.container}>
         <MapContext.Provider value={{selLocation,setSelLocation}}>
@@ -59,9 +75,11 @@ const MapComponents = () => {
             dragOn={dragOn}
             setDragOn={setDragOn}
             location={location}
+            city={city}
             />
               <APIProvider apiKey={apiKey} libraries={libs}>
-                  <Map
+                 {
+                  location &&  <Map
                     onTilesLoaded={handleMapLoad}
                     mapId={mapId}
                     style={containerStyle}
@@ -72,7 +90,7 @@ const MapComponents = () => {
                     scrollwheel={true}
                     onRenderingTypeChanged={"vector"}
                     disableDefaultUI
-                >
+                  >
                   {
                     selLocation.length > 0 && 
                     selLocation?.map((location,index) => (
@@ -84,7 +102,8 @@ const MapComponents = () => {
                       </AdvancedMarker>
                     ))
                   }
-                </Map> 
+                  </Map> 
+                 }
               </APIProvider>
           </MapContext.Provider>
     </div>
