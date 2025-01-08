@@ -37,7 +37,6 @@ const MapComponents = () => {
         }
         return res.json()
       }).then(data => {
-        console.log(data)
         if(data) {
           setLocation(JSON.parse(data.location.value));
           setCity(data.city.value);
@@ -62,6 +61,7 @@ const MapComponents = () => {
 
   return (
     <div className={MapStyle.container}>
+        <div className={MapStyle.menu}></div>
         <MapContext.Provider value={{selLocation,setSelLocation}}>
             <ScheduleList mapInfo={mapInfo}
             select={select}

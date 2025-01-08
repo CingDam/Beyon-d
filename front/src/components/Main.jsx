@@ -35,7 +35,6 @@ export default function Main() {
             }).then(data => {
                 console.log(data)
                 if(data.success) {
-                    console.log("성공")
                     router.push("/schedule")
                 }
             }).catch(err => console.log(err))

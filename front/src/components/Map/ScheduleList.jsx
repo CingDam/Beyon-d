@@ -19,9 +19,10 @@ const ScheduleList = ({mapInfo,
     const [dragIndex,setDragIndex] = useState(null);
     const {selLocation, setSelLocation} = useContext(MapContext);
     const [folded,setFolded] = useState(false);
+    const [token, setToken] = useState(null);
+    const [next,setNext] = useState(false);
 
     const searchRef = useRef();
-
     
     const createResult = (searchKeyword) => {
       let isCancelled = false;
@@ -70,11 +71,9 @@ const ScheduleList = ({mapInfo,
       
                 // 다음 페이지 처리
                 if (pageToken && pageToken.nextPage) {
-                  setTimeout(() => {
                     if (!isCancelled) {
-                      pageToken.nextPage();
+                      setToken(pageToken);
                     }
-                  }, 2000);
                 }
               }
             });
@@ -98,6 +97,18 @@ const ScheduleList = ({mapInfo,
         createResult(searchKeyword);
       }
     },[mapInfo,searchKeyword,resetSearch])
+
+    // 더보기 버튼
+    useEffect (()=> {
+      if(next && token) {
+        console.log("더보기 불러오기")
+        console.log(token);
+        token.nextPage();
+        if(token.hasNextPage) {
+          setNext(false)
+        }
+      }
+    },[next])
 
     // 마커 생성시 줄
     useEffect(() => {
@@ -134,6 +145,7 @@ const ScheduleList = ({mapInfo,
     // 장소 변경
     const changeKeyword = (keyword) => {
       setResults([]);
+      setNext(false);
       setResetSearch(false); // 먼저 초기화
       setTimeout(() => {
         setResetSearch(true); // 일정 시간 후 검색 트리거
@@ -223,9 +235,13 @@ const ScheduleList = ({mapInfo,
       }
     }
 
+    const getNextItem = () => {
+      setNext(true);
+    }
+
   return (
     <>
-      <div>
+      <div className={MapStyle.resultContainer}>
         <p className={MapStyle.subtitle}>추천 여행지</p>
         <div className={MapStyle.searchBar}>
             <input 
@@ -277,6 +293,7 @@ const ScheduleList = ({mapInfo,
                   result
               )}>{result.selStatus ? "선택됨":"추가"}</button>
           </div>)}
+           {next ? <></> :<button onClick = {getNextItem}>더보기</button>}
         </div>
 
       </div>
@@ -321,7 +338,7 @@ const ScheduleList = ({mapInfo,
       <div className={`${MapStyle.foldBtn} ${folded ? MapStyle.foldedBtn: ''}`}
         onClick = {() => (folded ? setFolded(false) : setFolded(true))}
       >
-          {folded ? <ArrowBackIosNewRounded/> : <ArrowForwardIosRounded/>}
+          {folded ? <ArrowForwardIosRounded/> : <ArrowBackIosNewRounded/>}
       </div>
     </>
   )

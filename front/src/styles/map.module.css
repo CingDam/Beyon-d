@@ -1,7 +1,7 @@
 .container {
     display: flex;
 }
-.container > div:first-child {
+.resultContainer {
     overflow: hidden;
     display: flex;
     border-right: 3px solid rgba(0, 0, 0, 0.25) ;
@@ -10,6 +10,13 @@
     justify-content: center;
     flex-direction: column;
 
+}
+
+.menu {
+    position: sticky;
+    width: 200px;
+    background-color: #0a0a0a;
+    border-right: 3px solid rgba(0, 0, 0, 0.25); ;
 }
 
 .selectContainer {
@@ -266,7 +273,7 @@
     z-index: 1;
     width : 30px;
     height : 90px;
-    left: calc(100vw - 52%); top: 450px;
+    left: calc(100vw - 49.5%); top: 450px;
 }
 .foldBtn > svg {
     margin-top: 30px;
@@ -276,26 +283,26 @@
 }
 
 .folded {
-    animation: to-left 1s;
+    animation: to-left 0.7s;
     opacity:0;
-    width: 10%;
+    width: 20%;
 }
 .foldedBtn {
-    animation: to-leftBtn 1s;
-    left: calc(100vw - 61.6%);
+    animation: to-leftBtn 0.6s;
+    left: calc(100vw - 55%);
 }
 @keyframes to-left {
     from {
         width: 40%;
     } to {
-        width: 10%;
+        width: 20%;
     }
 }
 @keyframes to-leftBtn {
     from {
-        left: calc(100vw - 52%);
+        left: calc(100vw - 49.5%);
     } to {
-        left: calc(100vw - 61.6%);
+        left: calc(100vw - 55%);
     }
 }
 @keyframes fade-out {
