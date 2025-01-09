@@ -59,9 +59,18 @@ const MapComponents = () => {
       setMapInfo(selMap);
     }
 
+    const toMain = () => {
+      router.back();
+    }
+
   return (
     <div className={MapStyle.container}>
-        <div className={MapStyle.menu}></div>
+        <div className={MapStyle.menu}>
+          <div onClick={toMain}>돌아가기</div>
+          <div>날짜선택</div>
+          <div>장소선택</div>
+          <div>숙소선택</div>
+        </div>
         <MapContext.Provider value={{selLocation,setSelLocation}}>
             <ScheduleList mapInfo={mapInfo}
             select={select}

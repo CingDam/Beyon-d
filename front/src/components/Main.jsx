@@ -10,12 +10,7 @@ export default function Main() {
     const [location,setLocation] = useState(null);
     const [city, setCity] = useState(null);
 
-    const onChangeLocation = (e) => {
-        const lat = Number(e.target.dataset.lat);
-        const lng = Number(e.target.dataset.lng);
-        setLocation({lat: lat, lng: lng});
-        setCity(e.target.innerText);
-
+    useEffect(() => {
         if(location) {
             fetch("/api/to-schedule",{
                 method:"POST",
@@ -39,6 +34,13 @@ export default function Main() {
                 }
             }).catch(err => console.log(err))
         }
+    },[location])
+
+    const onChangeLocation = (e) => {
+        const lat = Number(e.target.dataset.lat);
+        const lng = Number(e.target.dataset.lng);
+        setLocation({lat: lat, lng: lng});
+        setCity(e.target.innerText);
     }
 
     return (

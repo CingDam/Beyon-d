@@ -4,9 +4,9 @@
 .resultContainer {
     overflow: hidden;
     display: flex;
-    border-right: 3px solid rgba(0, 0, 0, 0.25) ;
+    border-right: 3px solid rgba(0, 0, 0, .5) ;
     padding: 10px;
-    width: 50%;
+    width: 55%;
     justify-content: center;
     flex-direction: column;
 
@@ -16,13 +16,27 @@
     position: sticky;
     width: 200px;
     background-color: #0a0a0a;
-    border-right: 3px solid rgba(0, 0, 0, 0.25); ;
 }
 
+.menu div {
+    box-sizing: border-box;
+    color:white;
+    padding : 20px;
+    letter-spacing: 3px;
+    font-weight: 500; font-size: 18px;
+    text-align: center;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+}
+.menu div:hover {
+    cursor: pointer;
+    background-color: #191919;
+    transition: 0.5s;
+}
 .selectContainer {
+    box-sizing: border-box;
     position: relative;
-    margin:0 10px;
-    width: 40%;
+    margin:0 20px;
+    width: 45%;
     padding: 10px;
 }
 
@@ -120,7 +134,7 @@
 }
 
 .searchBar > button > svg {
-    position: absolute; top: 6.8%; left: 23vw;
+    position: absolute; top: 7.6%; left: 27.5vw;
     width: 36px; height: 36px;
 }
 
@@ -179,7 +193,7 @@
     position: relative;
     border-radius: 5px;
     width: 20%;
-    padding: 5px 25px;
+    padding: 5px 20px;
     left: 0%; top: 20px;
     transition: 0.2s;
 }
@@ -204,7 +218,6 @@
     overflow: scroll;
     width: 100%;
     height: 100vh;
-    margin-left: 10px;
     -ms-overflow-style: none;
     user-select: none;
 }
@@ -273,7 +286,7 @@
     z-index: 1;
     width : 30px;
     height : 90px;
-    left: calc(100vw - 49.5%); top: 450px;
+    left: calc(100vw - 46.8%); top: 450px;
 }
 .foldBtn > svg {
     margin-top: 30px;
@@ -283,32 +296,24 @@
 }
 
 .folded {
-    animation: to-left 0.7s;
     opacity:0;
     width: 20%;
+    transition: width 0.5s ease, opacity 0.5s linear;
 }
+.expended {
+    width: 45%;
+    transition: width 0.5s ease-out;
+}
+.folded > div {
+    display: none;
+}
+
 .foldedBtn {
-    animation: to-leftBtn 0.6s;
-    left: calc(100vw - 55%);
+    transition: left .5s;
+    left: calc(100vw - 53.2%);
 }
-@keyframes to-left {
-    from {
-        width: 40%;
-    } to {
-        width: 20%;
-    }
-}
-@keyframes to-leftBtn {
-    from {
-        left: calc(100vw - 49.5%);
-    } to {
-        left: calc(100vw - 55%);
-    }
-}
-@keyframes fade-out {
-    from {
-        opacity:1;
-    } to {
-        opacity:0;
-    }
+
+.expendedBtn {
+    transition: left .51s;
+    left: calc(100vw - 46.8%);
 }

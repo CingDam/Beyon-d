@@ -21,6 +21,7 @@ const ScheduleList = ({mapInfo,
     const [folded,setFolded] = useState(false);
     const [token, setToken] = useState(null);
     const [next,setNext] = useState(false);
+    const [transEnd, setTransEnd] = useState(false);
 
     const searchRef = useRef();
     
@@ -29,10 +30,10 @@ const ScheduleList = ({mapInfo,
       const service = new window.google.maps.places.PlacesService(mapInfo);
 
         // 사각 구역 값 받아오기
-        const {Gh,ei} = mapInfo.getBounds();
+        const {Hh,ei} = mapInfo.getBounds();
 
         const bounds = new google.maps.LatLngBounds(
-          new google.maps.LatLng(Gh.lo,Gh.hi),
+          new google.maps.LatLng(Hh.lo,Hh.hi),
           new google.maps.LatLng(ei.lo,ei.lo)
         )
 
@@ -297,8 +298,19 @@ const ScheduleList = ({mapInfo,
         </div>
 
       </div>
-      <div className={`${MapStyle.selectContainer} ${folded ? MapStyle.folded : ''}`}>
-           <div className={MapStyle.subtitleContainer}>
+      <div className={`${MapStyle.selectContainer} ${folded ? MapStyle.folded : MapStyle.expended}`}
+        onTransitionEnd={()=> {
+          if(transEnd) {
+            setTransEnd(false)
+          } else {
+            setTransEnd(true)
+          }
+
+          console.log(transEnd)
+        }}
+        
+      >
+          <div className={MapStyle.subtitleContainer} style={{display : transEnd ? 'none' : ''}}>
             <span className={MapStyle.subtitle}>선택 목록</span>
               <button
               className={dragOn ? MapStyle.select:''}
@@ -306,14 +318,16 @@ const ScheduleList = ({mapInfo,
               {dragOn ? "수정완료" : "수정하기"}
               </button>
            </div>
-            <div className={MapStyle.selectBox}>
+            <div className={MapStyle.selectBox} style={{
+              display : transEnd ? 'none' : ''}}>
             {selLocation && <>
                     {
                     selectList.map((location,index) => (
                         <div key={index} draggable={dragOn}
                             onDragStart={() => dragStart(index)} 
                             onDragOver={(e) => dragOver(e,index)}
-                            onDrop={() => dragEnd(index)}>
+                            onDrop={() => dragEnd(index)}
+                            >
                         <div>
                             <p className={MapStyle.text}>{formatIndex(index+1)}</p>
                         </div>
@@ -322,7 +336,7 @@ const ScheduleList = ({mapInfo,
                         </div>
                         <div>
                             <p className={MapStyle.text}>{location.item.name}</p>
-                            <p className={MapStyle.address}>{location.item.formatted_address.substring(0,30)}...</p>
+                            <p className={MapStyle.address}>{location.item.formatted_address.substring(0,)}...</p>
                             <p>{location.item.types[0]}</p>
                         </div>
                         <button onClick={()=> DelSelLocation(index)}>
@@ -335,7 +349,7 @@ const ScheduleList = ({mapInfo,
                 }
         </div>
       </div>
-      <div className={`${MapStyle.foldBtn} ${folded ? MapStyle.foldedBtn: ''}`}
+      <div className={`${MapStyle.foldBtn} ${folded ? MapStyle.foldedBtn: MapStyle.expendedBtn}`}
         onClick = {() => (folded ? setFolded(false) : setFolded(true))}
       >
           {folded ? <ArrowForwardIosRounded/> : <ArrowBackIosNewRounded/>}
