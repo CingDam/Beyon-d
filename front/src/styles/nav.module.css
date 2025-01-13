@@ -1,0 +1,39 @@
+.container {
+    position: sticky;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 70px;
+    -ms-overflow-style: none;
+    user-select: none;
+}
+
+.container > h1 {
+    cursor: pointer;
+    padding-left: 150px;
+}
+
+.container div{
+    padding-right: 300px;
+}
+
+.container span {
+    cursor: pointer;
+    margin-right: 30px;
+    font-size: 18px;
+    color: rgba(0, 0, 0, 0.75);
+}
+
+
+.container button {
+    cursor: pointer;
+    padding: 10px 20px;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 25px;
+    font-size: 16px;
+}
+
+.container button:hover {
+    cursor: pointer;
+    transition: 0.5s;
+}
